@@ -19,29 +19,33 @@ export function saveToStorage() {
     localStorage.setItem ('cart' , JSON.stringify(cart));
 }
 
-export function addToCart (productId)
-    {
-        let matchingItem = null;
+export function addToCart(productId) {
+    let matchingItem = null;
 
-        // Find the matching item in the cart
-        cart.forEach((cartItem) => {
-            if (productId === cartItem.productId) {
-                matchingItem = cartItem;
-            }
-        });
-
-        // If the item exists in the cart, increment the quantity; otherwise, add it to the cart
-        if (matchingItem) {
-            matchingItem.quantity += 1;
-        } else {
-            cart.push({
-                productId: productId,
-                quantity: 1 ,
-                deliveryOptionId : '1'
-            });
+    // Find the matching item in the cart
+    cart.forEach((cartItem) => {
+        if (productId === cartItem.productId) {
+            matchingItem = cartItem;
         }
-        saveToStorage();
+    });
+
+    // If the item exists in the cart, increment the quantity; otherwise, add it to the cart
+    if (matchingItem) {
+        matchingItem.quantity += 1;
+    } else {
+        cart.push({
+            productId: productId,
+            quantity: 1,
+            deliveryOptionId: '1'
+        });
     }
+
+    console.log('Cart after update:', cart); // Debugging log
+
+    // Save to storage
+    saveToStorage();
+}
+
 
    export function removeFromCart (productId) {
         const newCart = []; 

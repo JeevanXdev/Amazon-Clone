@@ -2,13 +2,15 @@ import { cart ,removeFromCart } from "../data/cart.js";
 import { products } from "../data/products.js";
 import { FormatCurrency } from "./utlis/money.js";
 import dayjs from 'https://unpkg.com/dayjs@1.11.10/esm/index.js';
-import {deliveryOption} from '../data/deliveryOption.js';
+import deliveryOption from '../data/deliveryOption.js'
 
 const today = dayjs();
 const deliveryDate = today.add (7 , 'days');
 console.log(deliveryDate.format('dddd, MMMM D'));
 
 let cartSummaryHtml = '';
+
+let matchingProduct= products.find((product) => product.id === cart[0].productId);
 
 cart.forEach((cartItem) => {
 
@@ -23,11 +25,36 @@ cart.forEach((cartItem) => {
         }
     });
 
+   
+    const deliveryOptionId = cartItem.deliveryOptionId;
+
+// Ensure that deliveryOption is an array (for example, fetched from elsewhere)
+let deliveryOptions = [];  // Initialize with an empty array if no options are found
+
+// Assuming 'options' is an array of delivery options you want to loop over
+deliveryOptions.forEach((option) => {
+    if (option.id === deliveryOptionId) {
+        deliveryOption = option;  // Now deliveryOption will hold the selected option
+    }
+});
+
+if (!deliveryOption) {
+    console.error('No matching delivery option found.');
+    return;
+}
+
+const today = dayjs();
+const deliveryDate = today.add(
+    deliveryOption.deliveryDays, // Corrected to use the right property
+    'days'
+);
+const dateString = deliveryDate.format('dddd, MMMM D');
+
 
 cartSummaryHtml += `
 <div class="cart-item-container js-cart-item-container-${matchingProduct.id}">
         <div class="delivery-date">
-            Delivery date: Tuesday, June 21
+            Delivery date: ${dateString}
         </div>
 
         <div class="cart-item-details-grid">
@@ -59,7 +86,7 @@ cartSummaryHtml += `
                 Choose a delivery option:
             </div>
             
-            ${deliveryOptionHTML (matchingProduct)}
+            ${deliveryOptionHTML(matchingProduct , cartItem)}
             
             </div>
         </div>
@@ -68,43 +95,51 @@ cartSummaryHtml += `
 ` 
 });
 
-function deliveryOptionHTML (matchingProduct) {
+function deliveryOptionHTML(matchingProduct , cartItem) {
     let html = '';
-    deliveryOption.forEach (() => {
+    deliveryOption.forEach((option) => {
         const today = dayjs();
-        const deliveryDate = today.add (
-            deliveryOption.deliveryDays,
+        const deliveryDate = today.add(
+            option.deliveryDays, // ✅ Corrected property access
             'days'
         );
-        const dataString = deliveryDate.format (
+        const dateString = deliveryDate.format(
             'dddd, MMMM D'
         );
 
-        const priceString = deliveryOption.priceCents === 0
-        ? 'Free' : `$${FormatCurrency(deliveryOption.priceCents)} - `;
-        html +=
-        `
-         <div class="delivery-option">
-                <input type="radio"
-                class="delivery-option-input"
-                name="delivery-option-${matchingProduct.id}">
-                <div>
-                <div class="delivery-option-date">
-                    ${dataString}
-                </div>
-                <div class="delivery-option-price">
-                    ${priceString} Shipping
-                </div>
-                </div>
-            </div>
-        `
-    });
+        // Ensure priceCents is a valid number
+        const priceInDollars = option.priceCents ? (option.priceCents / 100).toFixed(2) : '0.00';
+        const priceString = option.priceCents === 0
+            ? 'Free' 
+            : `$${priceInDollars} - `; // ✅ Corrected formatting
 
-    return html; 
+            const isCheck = deliveryOption.id === cartItem.deliveryOptionId; // Ensure type consistency
+
+            console.log('Checking if option is selected:', deliveryOption.id, cartItem.deliveryOptionId, isCheck); // Debugging
+            
+            html += `
+                <div class="delivery-option">
+                    <input type="radio"
+                        ${isCheck ? 'checked' : ''}
+                        class="delivery-option-input"
+                        name="delivery-option-${matchingProduct.id}">
+                    <div>
+                        <div class="delivery-option-date">
+                            ${dateString}
+                        </div>
+                        <div class="delivery-option-price">
+                            ${priceString} Shipping
+                        </div>
+                    </div>
+                </div>
+            `;
+    });
+            console.log('Generated HTML:', html); // Debugging
+            return html;
+            
 }
 
-document.querySelector('.js-order-summary') 
-    .innerHTML = cartSummaryHtml;
+document.querySelector('.js-order-summary').innerHTML = cartSummaryHtml;
 
 document.querySelectorAll('.js-delete-link')
     .forEach((link) => {
