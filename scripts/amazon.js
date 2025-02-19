@@ -1,11 +1,30 @@
-import {cart , addToCart} from '../data/cart.js';
-import { products } from '../data/products.js';
-import { FormatCurrency } from './utlis/money.js';
+import { cart, addToCart } from "../data/cart.js";
+import { products } from "../data/products.js";
+import { FormatCurrency } from "./utlis/money.js";
 
-let productsHTML = '' ;
+// ✅ Load cart from localStorage when page loads
+function loadCartFromLocalStorage() {
+  const storedCart = localStorage.getItem("cart");
+
+  if (storedCart) {
+    // ✅ Parse the cart from localStorage and update cart
+    Object.assign(cart, JSON.parse(storedCart));
+  }
+}
+
+// ✅ Save cart to localStorage whenever it changes
+function saveCartToLocalStorage() {
+  localStorage.setItem("cart", JSON.stringify(cart));
+}
+
+// ✅ Load cart and update UI
+loadCartFromLocalStorage();
+updateCartQuantity();
+
+let productsHTML = "";
 
 products.forEach((product) => {
-    productsHTML +=  `
+  productsHTML += `
         <div class="product-container">
             <div class="product-image-container">
                 <img class="product-image"
@@ -50,38 +69,36 @@ products.forEach((product) => {
                 Added
             </div>
 
-            <button class="add-to-cart-button button-primary js-add-to-cart" data-product-id="${product.id}">
+            <button class="add-to-cart-button button-primary js-add-to-cart" data-product-id="${
+              product.id
+            }">
                 Add to Cart
             </button>
             </div>
     `;
 });
-    
 
-    function updateCartQuantity () {
-        let cartQuantity = 0;
-            
-        cart.forEach((cartItem) => {
-            // Ensure item.quantity is a number before adding
-           cartQuantity += cartItem.quantity ; 
-        });
+document.querySelector(".js-product-grid").innerHTML = productsHTML;
 
-        document.querySelector('.js-cart-quantity')
-            .innerHTML = cartQuantity;
+// ✅ Update cart quantity
+function updateCartQuantity() {
+  let totalQuantity = 0;
 
-    }
+  cart.forEach((cartItem) => {
+    totalQuantity += cartItem.quantity;
+  });
 
-document.querySelector('.js-product-grid')
-    .innerHTML = productsHTML;
+  document.querySelector(".js-cart-quantity").innerHTML = totalQuantity;
+  console.log(totalQuantity);
+}
 
-document.querySelectorAll('.js-add-to-cart')
-    .forEach((button) => {
-        button.addEventListener('click', () => {
-            const productId = button.dataset.productId;
+// ✅ Attach event listeners to add-to-cart buttons
+document.querySelectorAll(".js-add-to-cart").forEach((button) => {
+  button.addEventListener("click", () => {
+    const productId = button.dataset.productId;
 
-          addToCart(productId);
-          updateCartQuantity();
-        
-        });
-    });
-   
+    addToCart(productId);
+    saveCartToLocalStorage(); // ✅ Save cart data after updating
+    updateCartQuantity();
+  });
+});
