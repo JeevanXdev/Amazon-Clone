@@ -1,8 +1,9 @@
 import { cart, removeFromCart, updateDeliveryOption } from "../../data/cart.js";
-import { products } from "../../data/products.js";
+import { products , getProduct } from "../../data/products.js";
 import { FormatCurrency } from "../utlis/money.js";
 import dayjs from 'https://unpkg.com/dayjs@1.11.10/esm/index.js';
 import deliveryOptionsData from '../../data/deliveryOption.js';  // Updated import to match the name
+import { getdeliveryOption } from "../../data/deliveryOption.js";
 
 const today = dayjs();
 const deliveryDate = today.add(7, 'days');
@@ -15,16 +16,13 @@ export function renderOrderSummary () {
         cart.forEach((cartItem) => {
         const productId = cartItem.productId;
 
-        let matchingProduct = products.find((product) => product.id === productId);
+       const matchingProduct = getProduct(productId);
+
+
         const deliveryOptionId = cartItem.deliveryOptionId;
 
         // Ensure that deliveryOptionsData is an array (e.g., fetched from elsewhere)
-        let selectedDeliveryOption = deliveryOptionsData.find(option => option.id === deliveryOptionId);
-
-        if (!selectedDeliveryOption) {
-            console.error('No matching delivery option found.');
-            return;
-        }
+        let selectedDeliveryOption = getdeliveryOption(deliveryOptionId);
 
         const today = dayjs();
         const deliveryDate = today.add(
