@@ -69,9 +69,7 @@ products.forEach((product) => {
                 Added
             </div>
 
-            <button class="add-to-cart-button button-primary js-add-to-cart" data-product-id="${
-              product.id
-            }">
+            <button class="add-to-cart-button button-primary js-add-to-cart" data-product-id="${product.id}">
                 Add to Cart
             </button>
             </div>
@@ -100,5 +98,20 @@ document.querySelectorAll(".js-add-to-cart").forEach((button) => {
     addToCart(productId);
     saveCartToLocalStorage(); // ✅ Save cart data after updating
     updateCartQuantity();
+
+    // Add the "added" class and set opacity to 1
+    const addedMessage = button.closest(".product-container").querySelector(".added-to-cart");
+    addedMessage.classList.add("added"); // You can define the "added" class in CSS to change opacity
+
+    // Show opacity transition by adding a class
+    addedMessage.style.opacity = "1";
+
+    // Set a timeout to remove the opacity and hide it after 1.5 seconds
+    setTimeout(() => {
+      addedMessage.style.opacity = "0"; // Fade out
+      setTimeout(() => {
+        addedMessage.classList.remove("added"); // Optionally remove the "added" class
+      }, 500); // Delay to allow fading out
+    }, 1500); // After 1.5 seconds
   });
 });
